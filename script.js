@@ -10,7 +10,6 @@ if (count === null) {
 
 for (let index = 1; index <= count; index++) {
   text = localStorage.getItem("newNote_value[" + index + "]");
-  // console.log(text)
 
   $("ul").append(
     '<li class="new-todo" data-order =' +
@@ -41,7 +40,7 @@ $(document).ready(function () {
       let i = todo.length;
       todo[i] = temp;
       let text = $(this).val();
-      let count = Number(localStorage.getItem("newNote_count"));
+      let count = Number(localStorage.getItem("newNote_count")) + 1;
 
       if (text !== "") {
         //what to add to ul
@@ -62,14 +61,13 @@ $(document).ready(function () {
             "</div>" +
             "</li>"
         );
-        console.log(count)
+
         //add/save count and note to localStorage
-        localStorage.setItem("newNote_count", ++count);
+
+        localStorage.setItem("newNote_count", count);
+
         localStorage.setItem("newNote_value[" + count + "]", text);
-       
-        console.log(count)
         localStorage.setItem("todo", JSON.stringify(todo));
-       
       } else {
         alert("Please add a note");
       }
@@ -81,12 +79,16 @@ $(document).ready(function () {
   //add note by clicking "save" button
   document.querySelector(".add-note").onclick = function () {
     let text = $(".text-adding").val();
-    let count = Number(localStorage.getItem("newNote_count"));
+    let temp = {};
+    temp.check = false;
+    let i = todo.length;
+    todo[i] = temp;
+    let count = Number(localStorage.getItem("newNote_count")) + 1;
 
     if (text !== "") {
       $("ul").append(
         '<li class="new-todo"  data-order = "' +
-          count++ +
+          count +
           '"' +
           ">" +
           '<div class="input-group form-group mb-3">' +
@@ -102,33 +104,47 @@ $(document).ready(function () {
           "</div>" +
           "</li>"
       );
-      localStorage.setItem("newNote_count", ++count);
+      localStorage.setItem("newNote_count", count);
+
       localStorage.setItem("newNote_value[" + count + "]", text);
-      let temp = {};
-      temp.check = false;
-      let i = todo.length;
-      todo[i] = temp;
-
-      localStorage.setItem("todo[" + count + "]", JSON.stringify(todo));
-
-      $(textAdding).val("");
-    } else alert("Please add a note");
+      localStorage.setItem("todo", JSON.stringify(todo));
+    } else {
+      alert("Please add a note");
+    }
+    $(textAdding).val("");
   };
 
   //delete note from site and localStorage
   $("ul").on("click", ".remove-button", function () {
-    let newText = $(this).closest("li").data("order");
-    count = Number(localStorage.getItem("newNote_count"));
-    localStorage.removeItem("newNote_value[" + ++newText + "]"); //delete exact note from localStorage
+    let newValue = $(this).closest("li").data("order");
+
+    let count = Number(localStorage.getItem("newNote_count"));
+    localStorage.removeItem("newNote_value[" + newValue + "]"); //delete exact note from localStorage
+
+    for (let index = newValue; index < count; index++) {
+      let nextElem = index + 1;
+
+      let text = localStorage.getItem("newNote_value[" + nextElem + "]");
+
+      localStorage.setItem("newNote_value[" + index + "]", text);
+      localStorage.removeItem("newNote_value[" + nextElem + "]"); //delete exact note from localStorage
+      // localStorage.setItem("newNote_count", --count); //reduce count of notes
+
+      // $(this).closest("li").remove(); //delete note from site
+    }
+
     localStorage.setItem("newNote_count", --count); //reduce count of notes
-    this.closest("li").remove(); //delete note from site
+
+    $(this).closest("li").remove(); //delete note from site
   });
 
   //if update note, to save updated text to localStorage
-  $("ul").on("input", ".new-note", ".new-todo", function () {
-    let text = $(this).val();
-    let newText = $(this).closest("li").data("order"); //taking number of li
-    localStorage.setItem("newNote_value[" + ++newText + "]", text); //input updated text to localStorage
+  $("ul").on("click", ".new-todo", function () {
+    $(".new-note").on("input", function () {
+      let text = $(this).val();
+      let newValue = $(this).closest("li").data("order"); //taking number of li
+      localStorage.setItem("newNote_value[" + newValue + "]", text); //input updated text to localStorage
+    });
   });
 
   if (localStorage.getItem("todo")) {
@@ -169,7 +185,6 @@ $(document).ready(function () {
       }
     }
   };
-  // };
 
   //to clear all notes from site and localStorage
   document.querySelector(".clear").onclick = function () {
@@ -180,8 +195,26 @@ $(document).ready(function () {
   //to be able to move notes up and down
 
   $(function () {
-    $("ul").sortable();
+    $("ul").sortable({
+      update: function (event, ui) {
+        $(this)
+          .children()
+          .each(function (index) {
+            let newOrder = $(this).attr("data-order");
+            let text = $(this).closest("li").find("textarea").val();
+            console.log(text);
+            if (newOrder != index + 1) {
+              $(this).attr("data-order", index + 1);
+              // .addClass("updated");
+              $(this).attr("data-order") == index + 1;
+              let newText = $(this).closest("li").data("order"); //taking number of li
+              // console.log(newText);
+              localStorage.setItem("newNote_value[" + newText + "]", text);
+            }
+          });
+      },
+    });
+
     $("ul").disableSelection();
-    
   });
 });
