@@ -36,13 +36,14 @@ $(document).ready(function () {
     if (event.which === 13) {
       event.preventDefault();
       let temp = {};
-      temp.check = false;
-      let i = todo.length;
-      todo[i] = temp;
+      
       let text = $(this).val();
       let count = Number(localStorage.getItem("newNote_count")) + 1;
 
       if (text !== "") {
+        temp.check = false;
+      let i = todo.length;
+      todo[i] = temp;
         //what to add to ul
         $("ul").append(
           '<li class="new-todo" data-order =' +
@@ -117,22 +118,20 @@ $(document).ready(function () {
   //delete note from site and localStorage
   $("ul").on("click", ".remove-button", function () {
     let newValue = $(this).closest("li").data("order");
-
+  
     let count = Number(localStorage.getItem("newNote_count"));
-    localStorage.removeItem("newNote_value[" + newValue + "]"); //delete exact note from localStorage
+    // localStorage.removeItem("newNote_value[" + newValue + "]"); //delete exact note from localStorage
 
     for (let index = newValue; index < count; index++) {
       let nextElem = index + 1;
 
       let text = localStorage.getItem("newNote_value[" + nextElem + "]");
-
+      
       localStorage.setItem("newNote_value[" + index + "]", text);
       localStorage.removeItem("newNote_value[" + nextElem + "]"); //delete exact note from localStorage
-      // localStorage.setItem("newNote_count", --count); //reduce count of notes
 
-      // $(this).closest("li").remove(); //delete note from site
     }
-
+    // localStorage.removeItem("newNote_value[" + nextElement + "]");
     localStorage.setItem("newNote_count", --count); //reduce count of notes
 
     $(this).closest("li").remove(); //delete note from site
